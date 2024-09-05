@@ -1,4 +1,5 @@
 ﻿using HelpersLayer.Helpers.Bases;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServicesLayer.Features.Requests;
 using ServicesLayer.Services;
@@ -14,7 +15,7 @@ namespace HelperData.Controllers
             _testService = testService;
         }
 
-
+        [Authorize]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] GetAllPaginationRequest request)
         {

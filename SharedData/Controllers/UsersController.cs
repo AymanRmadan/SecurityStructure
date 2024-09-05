@@ -22,16 +22,17 @@ namespace Shared.API.Controllers
             var result = await _accountsService.Registration(request);
             return ApiResult(result);
         }
-        // [Route("~/api/auth/login")]
-        //[HttpPost]
-        //public async Task<IActionResult> Login(LoginRequest request)
-        //{
 
-        //    var result = await _accountsService.Login(request);
+        [Route("~/api/auth/login")]
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginRequest request)
+        {
 
-        //    return ApiResult(result);
+            var result = await _accountsService.Login(request);
 
-        //}
+            return ApiResult(result);
+
+        }
 
     }
 }

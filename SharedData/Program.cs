@@ -17,7 +17,7 @@ builder.Services.AddHelpersLayerDependenciesDependencies();
 
 
 // Register other service dependencies if necessary
-builder.Services.AddServicesDependencies();
+builder.Services.AddServicesDependencies(builder.Configuration);
 
 builder.Services.AddControllers();
 
