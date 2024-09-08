@@ -1,8 +1,8 @@
 ﻿using HelpersLayer.Helpers.ResponseHandler;
-using ServicesLayer.Features.Requests;
-using ServicesLayer.Features.Responses;
+using ServicesLayer.Features.GetAll.Requests;
+using ServicesLayer.Features.GetAll.Responses;
 
-namespace ServicesLayer.Services
+namespace ServicesLayer.Services.TestServices
 {
     public interface ITestService
     {

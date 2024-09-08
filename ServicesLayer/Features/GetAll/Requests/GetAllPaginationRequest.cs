@@ -1,4 +1,4 @@
-﻿namespace ServicesLayer.Features.Requests
+﻿namespace ServicesLayer.Features.GetAll.Requests
 {
     public record GetAllPaginationRequest
     {

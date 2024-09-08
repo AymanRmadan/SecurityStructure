@@ -2,12 +2,12 @@
 using HelpersLayer.Helpers.Bases;
 using HelpersLayer.Helpers.Repositorys.GenaricBase.Interface;
 using HelpersLayer.Helpers.ResponseHandler;
-using ServicesLayer.Features.Mapping;
-using ServicesLayer.Features.Requests;
-using ServicesLayer.Features.Responses;
+using ServicesLayer.Features.GetAll.Mapping;
+using ServicesLayer.Features.GetAll.Requests;
+using ServicesLayer.Features.GetAll.Responses;
 using static HelpersLayer.Helpers.ResponseHandler.ApiResponseHandler;
 
-namespace ServicesLayer.Services
+namespace ServicesLayer.Services.TestServices
 {
     public class TestService : AppService, ITestService
     {

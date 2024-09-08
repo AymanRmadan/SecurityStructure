@@ -8,6 +8,7 @@ namespace ServicesLayer.Services.AccountsServices
     {
         Task<ApiResponse<AddRegistrationResponse>> Registration(AddRegistrationRequest request);
         Task<ApiResponse<LoginResponse>> Login(LoginRequest request);
+        Task<ApiResponse<string>> SendEmail(EmailModelRequest request);
 
 
     }

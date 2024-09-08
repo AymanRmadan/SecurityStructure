@@ -1,8 +1,8 @@
 ﻿using HelpersLayer.Helpers.Bases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ServicesLayer.Features.Requests;
-using ServicesLayer.Services;
+using ServicesLayer.Features.GetAll.Requests;
+using ServicesLayer.Services.TestServices;
 
 namespace HelperData.Controllers
 {

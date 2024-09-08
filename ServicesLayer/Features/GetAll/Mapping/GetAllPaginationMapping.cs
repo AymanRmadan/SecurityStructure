@@ -1,9 +1,9 @@
 ﻿using InfrastructureLayer.Entities;
 using InfrastructureLayer.Enums.EnumSetting;
 using Microsoft.EntityFrameworkCore;
-using ServicesLayer.Features.Responses;
+using ServicesLayer.Features.GetAll.Responses;
 
-namespace ServicesLayer.Features.Mapping
+namespace ServicesLayer.Features.GetAll.Mapping
 {
     public static class GetAllPaginationMapping
     {

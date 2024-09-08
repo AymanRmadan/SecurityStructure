@@ -1,4 +1,4 @@
-﻿namespace ServicesLayer.Features.Responses
+﻿namespace ServicesLayer.Features.GetAll.Responses
 {
     public record GetAllPaginationResponse
     {
