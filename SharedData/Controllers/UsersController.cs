@@ -34,5 +34,19 @@ namespace Shared.API.Controllers
 
         }
 
+        [HttpGet("reset-password/{email}")]
+        public async Task<IActionResult> ForgetPassword(string email)
+        {
+            var result = await _accountsService.ForgetPassword(email);
+            return ApiResult(result);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _accountsService.ResetPassword(request);
+            return ApiResult(result);
+        }
+
     }
 }

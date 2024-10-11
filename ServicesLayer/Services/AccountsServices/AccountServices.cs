@@ -14,6 +14,7 @@ using MimeKit;
 using ServicesLayer.Features.Accounts.Mapping;
 using ServicesLayer.Features.Accounts.Requests;
 using ServicesLayer.Features.Accounts.Responses;
+using ServicesLayer.Features.Accounts.Validation;
 using Shared.Service.Features.Account.Validators;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
@@ -108,7 +109,6 @@ namespace ServicesLayer.Services.AccountsServices
         }
 
         // =============================  Generate Jwt Token ==================================
-
         private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
             //Token claims
@@ -180,33 +180,101 @@ namespace ServicesLayer.Services.AccountsServices
             //end of sending email
         }
 
-        private string ConstructConfirmationUrl(string userId, string code)
+        //private string ConstructConfirmationUrl(string email, string token)
+        //{
+        //    var requestAccessor = httpContextAccessor.HttpContext.Request;
+        //    return $"{requestAccessor?.Scheme}://{requestAccessor.Host}{urlHelper.Action("reset-password", "Users", new { Email = email, Code = token })}";
+
+        //}
+
+        private string ConstructConfirmationUrl(string email, string token)
         {
-            var requestAccessor = httpContextAccessor.HttpContext.Request;
-            return $"{requestAccessor?.Scheme}://{requestAccessor.Host}{urlHelper.Action("ConfirmEmail", "Emails", new { UserId = userId, Code = code })}";
+            var request = httpContextAccessor.HttpContext.Request;
+            var encodedToken = Uri.EscapeDataString(token); // Use Uri.EscapeDataString for encoding
+            return $"{request.Scheme}://{request.Host}/api/Users/reset-password?email={email}&token={encodedToken}";
         }
 
-        private EmailModelRequest ConstructEmailModel(string recipientEmail, string confirmationUrl)
+
+        private EmailModelRequest ConstructEmailModel(string email, string token)
         {
+            var resetPasswordPage = $"https://localhost:44341/api/Users/reset-password?email={email}&token={token}";
+
             var message = $@"<html>
-        <head></head>
-        <body style=""margin:0; padding:0; font-family:Arial, Helvetica, sans-serif;"">
-            <div style=""height:auto; background:linear-gradient(to top, #c9c9ff 50%, #6e6ef6 90%) no-repeat; width:400px; padding:30px"">
-                <div>
+            <head></head>
+            <body style=""margin:0; padding:0; font-family:Arial, Helvetica, sans-serif;"">
+                <div style=""height:auto; background:linear-gradient(to top, #c9c9ff 50%, #6e6ef6 90%) no-repeat; width:400px; padding:30px"">
                     <div>
-                        <h1>Confirm your Email</h1>
-                        <hr>
-                        <p>You are receiving this e-mail because you requested a Confirm Email for your Let's program account.</p>
-                        <p>Please click on the button below to Confirm your Email:</p>
-                        <a href={confirmationUrl} target=""_blank"" style=""background:#0d6efd; padding:10px; border:none; color:white; border-radius:4px; display:block; margin:0 auto; width:50%; text-align:center; text-decoration:none;"">Confirm Email</a><br>
-                        <p>Madina System, <br><br>AYMAN RAMADAN.</p>
+                        <div>
+                            <h1>Confirm your Email</h1>
+                            <hr>
+                            <p>You are receiving this e-mail because you requested a Confirm Email for your Let's program account.</p>
+                            <p>Please click on the button below to Confirm your Email:</p>
+                            <a href={resetPasswordPage} target=""_blank"" style=""background:#0d6efd; padding:10px; border:none; color:white; border-radius:4px; display:block; margin:0 auto; width:50%; text-align:center; text-decoration:none;"">Confirm Email</a><br>
+                            <p>Madina System, <br><br>AYMAN RAMADAN.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </body>
-    </html>";
+            </body>
+        </html>";
 
-            return new EmailModelRequest(recipientEmail, "Confirm Email!!", message);
+            return new EmailModelRequest(email, "Confirm Email!!", message);
         }
+
+
+        // ============================= Forget Password ==================================
+        public async Task<ApiResponse<string>> ForgetPassword(string Email)
+        {
+            var user = await _userManager.FindByEmailAsync(Email);
+            if (user == null)
+            {
+                return NotFound<string>("User not Found");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            user.ResetPasswordToken = token;
+            user.ResetPasswordExpiry = DateTime.Now.AddMinutes(10);
+
+            string from = configuration["EmailSittings:From"];
+
+            //  var emailModel = new EmailModelRequest(Email, "Reset Password!!", EmailBody.EmailStringBody(Email, token));
+            var emailModel = new EmailModelRequest(Email, "Reset Password!!", ConstructConfirmationUrl(Email, token));
+            await SendEmail(emailModel);
+            await _userManager.UpdateAsync(user);
+
+            return Success<string>("Email Send");
+        }
+
+        // =============================  Reset Password ==================================
+        public async Task<ApiResponse<string>> ResetPassword(ResetPasswordRequest resetPasswordDto)
+        {
+            await DoValidationAsync<ResetPasswordRequestValidator, ResetPasswordRequest>(resetPasswordDto);
+            // Check if EmailToken is null
+
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+
+            if (user == null)
+            {
+                return NotFound<string>("User not found");
+            }
+            if (user.ResetPasswordToken != null && user.ResetPasswordExpiry != null && user.ResetPasswordExpiry > DateTime.Now)
+            {
+
+                var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+
+                // Check if user.ResetPasswordToken is null
+                if (result.Succeeded)
+                {
+                    user.ResetPasswordExpiry = null;
+                    user.ResetPasswordToken = null;
+                    await _userManager.UpdateAsync(user);
+                    return Success("Password has been reset successfully");
+                }
+
+                return BadRequest<string>("Failed to reset password");
+            }
+
+            return BadRequest<string>("Link Expired");
+        }
+
     }
 }
